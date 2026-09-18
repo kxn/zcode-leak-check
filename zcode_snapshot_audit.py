@@ -36,7 +36,7 @@ import datetime
 from pathlib import Path
 
 APP_NAME = "ZCode 快照外传检查器"
-APP_VERSION = "1.1"
+APP_VERSION = "1.1.1"
 
 # ----------------------------------------------------------------------------
 # 通用工具
@@ -901,6 +901,25 @@ def run_gui():
     f_path = f_def.copy(); f_path.configure(size=12, weight="bold")
     f_small = f_def.copy(); f_small.configure(size=9)
 
+    def mac_flat_button(parent, text, font, command, padx, pady):
+        """macOS 的 tk.Button 固定画成浅色原生按钮、忽略 bg，白字会看不见；
+        改用 Label 模拟扁平蓝色按钮（同样支持 config(state=..., text=...)）。"""
+        b = tk.Label(parent, text=text, font=font, bg="#2563eb", fg="white",
+                     disabledforeground="#bfdbfe", padx=padx, pady=pady, cursor="hand2")
+
+        def on_click(_e):
+            if str(b.cget("state")) != "disabled":
+                command()
+
+        def on_enter(_e):
+            if str(b.cget("state")) != "disabled":
+                b.config(bg="#1d4ed8")
+
+        b.bind("<Button-1>", on_click)
+        b.bind("<Enter>", on_enter)
+        b.bind("<Leave>", lambda _e: b.config(bg="#2563eb"))
+        return b
+
     nb_main = ttk.Notebook(root)
     nb_main.pack(fill="both", expand=True)
 
@@ -919,10 +938,14 @@ def run_gui():
     ttk.Checkbutton(tab_home, text="同时自动搜索本机所有磁盘分区，含网络/映射盘（每盘限时探测，卡不了）",
                     variable=drive_var).grid(row=2, column=0)
 
-    btn_home = tk.Button(tab_home, text="🔍  一 键 检 查", font=f_big_btn,
-                         bg="#2563eb", fg="white", activebackground="#1d4ed8",
-                         activeforeground="white", relief="flat", cursor="hand2",
-                         padx=40, pady=16, command=lambda: do_scan(), bd=0)
+    if sys.platform == "darwin":
+        btn_home = mac_flat_button(tab_home, "🔍  一 键 检 查", f_big_btn,
+                                   lambda: do_scan(), padx=40, pady=16)
+    else:
+        btn_home = tk.Button(tab_home, text="🔍  一 键 检 查", font=f_big_btn,
+                             bg="#2563eb", fg="white", activebackground="#1d4ed8",
+                             activeforeground="white", relief="flat", cursor="hand2",
+                             padx=40, pady=16, command=lambda: do_scan(), bd=0)
     btn_home.grid(row=3, column=0, pady=14)
 
     home_status = tk.StringVar(value="点击“一键检查”开始（完全离线运行，只读取本地文件，不联网）")
@@ -1388,9 +1411,12 @@ def run_gui():
             P("\n提示：快照机制内置于 ZCode 客户端，登录状态下即可能被激活（UI 开关管不住）；\n", "head")
             P("建议定期用本工具复查。本工具完全离线，只读取本地文件。\n", "head")
         txt.config(state="disabled")
-        tk.Button(tl, text="  知道了  ", font=ftl_body, bg="#2563eb", fg="white",
-                  relief="flat", padx=22, pady=6, cursor="hand2",
-                  command=tl.destroy).pack(pady=8)
+        if sys.platform == "darwin":
+            mac_flat_button(tl, "  知道了  ", ftl_body, tl.destroy, padx=22, pady=6).pack(pady=8)
+        else:
+            tk.Button(tl, text="  知道了  ", font=ftl_body, bg="#2563eb", fg="white",
+                      relief="flat", padx=22, pady=6, cursor="hand2",
+                      command=tl.destroy).pack(pady=8)
         tl.update_idletasks()
         try:
             x = root.winfo_x() + (root.winfo_width() - tl.winfo_width()) // 2

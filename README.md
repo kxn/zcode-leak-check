@@ -11,17 +11,22 @@
 | 文件 | 平台 | 形态 |
 |---|---|---|
 | `zcode-leak-check-windows.exe` | Windows | GUI（双击运行，无控制台窗口） |
-| `zcode-leak-check-macos-app.zip` | macOS | **GUI .app 包（推荐）**：解压后得到 `zcode-leak-check.app`，在 Finder 里双击即可运行 |
+| `zcode-leak-check-1.1.0-macos-arm64-app.zip` / `...-x64-app.zip` | macOS | **GUI .app 包（推荐）**：已签名 + Apple 公证，解压后双击 `zcode-leak-check.app` 直接运行，无 Gatekeeper 拦截（Apple Silicon 选 arm64，Intel 选 x64） |
+| `zcode-leak-check-1.1.0-macos-arm64.dmg` / `...-x64.dmg` | macOS | 同上的 DMG 安装镜像（拖入 Applications 即可） |
+| `zcode-leak-check-macos-app.zip` | macOS | CI 构建的未签名 .app（含最新代码；首次运行需放行 Gatekeeper，见下） |
 | `zcode-leak-check-macos` | macOS | GUI 单文件二进制（命令行/进阶用户） |
 | `zcode-leak-check-linux` | Linux | CLI（**运行即自动开始扫描**，输出 Markdown 报告；ZCode 桌面端无 Linux GUI 场景） |
 
-### macOS 首次运行说明（未签名应用的正常现象）
+> 签名/公证版由 [@Octo-o-o-o](https://github.com/Octo-o-o-o) 基于 v1.1.0 源码构建（见下方致谢）；
+> CI 构建版跟随 main 分支最新代码但未签名。公证构建配方开源在 [`packaging/macos/`](packaging/macos/)。
 
-直接双击若被 Gatekeeper 拦截，任选其一：
+### macOS 首次运行说明
 
-- **右键点击** `zcode-leak-check.app` → **打开** → 再点"打开"；
-- 或 系统设置 → 隐私与安全性 → 底部"`zcode-leak-check` 已被阻止"→ **仍要打开**；
-- 或终端执行：`xattr -dr com.apple.quarantine /path/to/zcode-leak-check.app`
+- **签名公证版**（`*-app.zip` / `*.dmg`）：直接双击运行，无拦截；
+- **CI 未签名版**：直接双击若被 Gatekeeper 拦截，任选其一：
+  - **右键点击** `zcode-leak-check.app` → **打开** → 再点"打开"；
+  - 或 系统设置 → 隐私与安全性 → 底部"`zcode-leak-check` 已被阻止"→ **仍要打开**；
+  - 或终端执行：`xattr -dr com.apple.quarantine /path/to/zcode-leak-check.app`
 
 ## 使用
 
@@ -68,6 +73,10 @@ Windows 下也可以直接双击 [`启动检查器-Windows.bat`](启动检查器
 - 只能看到**磁盘上还留着的证据**。日志若被应用轮转清理或人为删除，对应时间窗口无法还原；
 - 检测标志主要来自对当前版本（3.11.x）的逆向，老版本换了日志措辞的部分靠工件兜底层与版本无关标志覆盖，但不能承诺 100%；
 - 网络/映射盘做限时探测（每盘约 4 秒），只扫第一层。
+
+## 致谢
+
+- 感谢 **yixiao（[@Octo-o-o-o](https://github.com/Octo-o-o-o)）** 为本项目完成 macOS Developer ID 签名与 Apple 公证（arm64/x64 双架构的 .app 与 .dmg），贡献了修复 macOS 按钮渲染问题的补丁（macOS 原生 `tk.Button` 忽略 `bg`，导致扁平蓝底白字大按钮不可见），并开源了完整的签名/公证构建配方（见 [`packaging/macos/`](packaging/macos/)）。
 
 ## 免责声明
 
