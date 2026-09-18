@@ -11,18 +11,18 @@
 | 文件 | 平台 | 形态 |
 |---|---|---|
 | `zcode-leak-check-windows.exe` | Windows | GUI（双击运行，无控制台窗口） |
-| `zcode-leak-check-1.1.0-macos-arm64-app.zip` / `...-x64-app.zip` | macOS | **GUI .app 包（推荐）**：已签名 + Apple 公证，解压后双击 `zcode-leak-check.app` 直接运行，无 Gatekeeper 拦截（Apple Silicon 选 arm64，Intel 选 x64） |
+| `zcode-leak-check-1.1.0-macos-arm64-app.zip` / `...-x64-app.zip` | macOS | **GUI .app 包（推荐）**：已签名 + Apple 公证，且包含 macOS 按钮修复；解压后双击 `zcode-leak-check.app` 直接运行，无 Gatekeeper 拦截（Apple Silicon 选 arm64，Intel 选 x64） |
 | `zcode-leak-check-1.1.0-macos-arm64.dmg` / `...-x64.dmg` | macOS | 同上的 DMG 安装镜像（拖入 Applications 即可） |
 | `zcode-leak-check-macos-app.zip` | macOS | CI 构建的未签名 .app（含最新代码；首次运行需放行 Gatekeeper，见下） |
 | `zcode-leak-check-macos` | macOS | GUI 单文件二进制（命令行/进阶用户） |
 | `zcode-leak-check-linux` | Linux | CLI（**运行即自动开始扫描**，输出 Markdown 报告；ZCode 桌面端无 Linux GUI 场景） |
 
-> 签名/公证版由 [@Octo-o-o-o](https://github.com/Octo-o-o-o) 基于 v1.1.0 源码构建（见下方致谢）；
-> CI 构建版跟随 main 分支最新代码但未签名。公证构建配方开源在 [`packaging/macos/`](packaging/macos/)。
+> **推荐 macOS 用户直接用签名公证版**：已包含 macOS 按钮修复，双击即可运行，无任何拦截。
+> 签名/公证版由 [@Octo-o-o-o](https://github.com/Octo-o-o-o) 构建（见下方致谢）；CI 构建版跟随 main 分支最新代码但未签名。公证构建配方开源在 [`packaging/macos/`](packaging/macos/)。
 
 ### macOS 首次运行说明
 
-- **签名公证版**（`*-app.zip` / `*.dmg`）：直接双击运行，无拦截；
+- **签名公证版**（`*-app.zip` / `*.dmg`）：已包含按钮修复，直接双击运行，无拦截；
 - **CI 未签名版**：直接双击若被 Gatekeeper 拦截，任选其一：
   - **右键点击** `zcode-leak-check.app` → **打开** → 再点"打开"；
   - 或 系统设置 → 隐私与安全性 → 底部"`zcode-leak-check` 已被阻止"→ **仍要打开**；
