@@ -36,7 +36,7 @@ import datetime
 from pathlib import Path
 
 APP_NAME = "ZCode 快照外传检查器"
-APP_VERSION = "1.0"
+APP_VERSION = "1.1"
 
 # ----------------------------------------------------------------------------
 # 通用工具

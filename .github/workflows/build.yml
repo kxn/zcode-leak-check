@@ -34,10 +34,17 @@ jobs:
         if: matrix.target == 'windows'
         run: pyinstaller --onefile --clean --windowed --name zcode-leak-check-windows zcode_snapshot_audit.py
 
-      # macOS：GUI 可执行
-      - name: Build macOS GUI binary
+      # macOS：GUI .app 包（Finder 可双击）+ 单文件二进制（命令行用户）
+      - name: Build macOS .app bundle and onefile binary
         if: matrix.target == 'macos'
-        run: pyinstaller --onefile --clean --windowed --name zcode-leak-check-macos zcode_snapshot_audit.py
+        run: |
+          pyinstaller --onedir --clean --windowed --name zcode-leak-check zcode_snapshot_audit.py
+          test -d dist/zcode-leak-check.app/Contents/MacOS
+          test -x dist/zcode-leak-check.app/Contents/MacOS/zcode-leak-check
+          pyinstaller --onefile --clean --windowed --noconfirm --name zcode-leak-check-macos zcode_snapshot_audit.py
+          cd dist
+          ditto -c -k --keepParent zcode-leak-check.app zcode-leak-check-macos-app.zip
+          cd ..
 
       # Linux：CLI（ZCode 桌面端无 Linux GUI 场景），运行即自动开始扫描
       - name: Build Linux CLI binary
@@ -50,7 +57,7 @@ jobs:
           mkdir -p out
           case "${{ matrix.target }}" in
             windows) cp dist/zcode-leak-check-windows.exe out/ ;;
-            macos)   cp dist/zcode-leak-check-macos out/ ;;
+            macos)   cp dist/zcode-leak-check-macos out/ && cp dist/zcode-leak-check-macos-app.zip out/ ;;
             linux)   cp dist/zcode-leak-check-linux out/ ;;
           esac
           ls -la out/

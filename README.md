@@ -11,8 +11,17 @@
 | 文件 | 平台 | 形态 |
 |---|---|---|
 | `zcode-leak-check-windows.exe` | Windows | GUI（双击运行，无控制台窗口） |
-| `zcode-leak-check-macos` | macOS | GUI（首次运行需 `xattr -d com.apple.quarantine` 去除隔离标记） |
+| `zcode-leak-check-macos-app.zip` | macOS | **GUI .app 包（推荐）**：解压后得到 `zcode-leak-check.app`，在 Finder 里双击即可运行 |
+| `zcode-leak-check-macos` | macOS | GUI 单文件二进制（命令行/进阶用户） |
 | `zcode-leak-check-linux` | Linux | CLI（**运行即自动开始扫描**，输出 Markdown 报告；ZCode 桌面端无 Linux GUI 场景） |
+
+### macOS 首次运行说明（未签名应用的正常现象）
+
+直接双击若被 Gatekeeper 拦截，任选其一：
+
+- **右键点击** `zcode-leak-check.app` → **打开** → 再点"打开"；
+- 或 系统设置 → 隐私与安全性 → 底部"`zcode-leak-check` 已被阻止"→ **仍要打开**；
+- 或终端执行：`xattr -dr com.apple.quarantine /path/to/zcode-leak-check.app`
 
 ## 使用
 
