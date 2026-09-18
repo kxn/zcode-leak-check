@@ -1,0 +1,88 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows
+          - os: macos-latest
+            target: macos
+          - os: ubuntu-latest
+            target: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip && pip install pyinstaller
+
+      # Windows：GUI 可执行（无控制台窗口）
+      - name: Build Windows GUI exe
+        if: matrix.target == 'windows'
+        run: pyinstaller --onefile --clean --windowed --name zcode-leak-check-windows zcode_snapshot_audit.py
+
+      # macOS：GUI 可执行
+      - name: Build macOS GUI binary
+        if: matrix.target == 'macos'
+        run: pyinstaller --onefile --clean --windowed --name zcode-leak-check-macos zcode_snapshot_audit.py
+
+      # Linux：CLI（ZCode 桌面端无 Linux GUI 场景），运行即自动开始扫描
+      - name: Build Linux CLI binary
+        if: matrix.target == 'linux'
+        run: pyinstaller --onefile --clean --name zcode-leak-check-linux entry_cli.py
+
+      - name: Collect artifact
+        shell: bash
+        run: |
+          mkdir -p out
+          case "${{ matrix.target }}" in
+            windows) cp dist/zcode-leak-check-windows.exe out/ ;;
+            macos)   cp dist/zcode-leak-check-macos out/ ;;
+            linux)   cp dist/zcode-leak-check-linux out/ ;;
+          esac
+          ls -la out/
+
+      - name: Smoke test (Linux CLI binary runs)
+        if: matrix.target == 'linux'
+        run: |
+          ./dist/zcode-leak-check-linux --no-drives --export smoke-report.md > /dev/null 2>&1 || true
+          test -s smoke-report.md
+          head -20 smoke-report.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zcode-leak-check-${{ matrix.target }}
+          path: out/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: out
+
+      - name: Attach binaries to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          generate_release_notes: true
